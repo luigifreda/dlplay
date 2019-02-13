@@ -1,0 +1,14 @@
+{
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    // "editor.formatOnSave": true   // this is just for formatting python code, not for other languages
+  },
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/dlplay",
+    "${workspaceFolder}/thirdparty/torch-points3d",
+    "${env:HOME}/.pyenv/versions/3.11.9/envs/dlplay/lib/python3.11/site-packages/"
+  ],
+
+  "editor.formatOnSave": true, // this is for global formatting, all languages
+  "files.trimFinalNewlines": false
+}

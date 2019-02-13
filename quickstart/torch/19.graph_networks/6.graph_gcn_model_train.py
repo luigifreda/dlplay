@@ -1,0 +1,91 @@
+# ******************************************************************************
+# This file is part of dlplay
+# 
+# Copyright (C) Luigi Freda <luigi dot freda at gmail dot com>
+# 
+# dlplay is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# dlplay is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with dlplay. If not, see <http://www.gnu.org/licenses/>.
+# ******************************************************************************
+
+from torch_geometric.datasets import Planetoid
+from dlplay.paths import DATA_DIR
+from dlplay.utils.device import resolve_device
+
+import torch
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
+
+
+# This class defines a GCN model with two GCNConv layers which get called in the forward pass of our network.
+# Note that the non-linearity is not integrated in the conv calls and hence needs to be applied
+# afterwards (something which is consistent across all operators in PyG).
+# Here, we chose to use ReLU as our intermediate non-linearity and finally output a softmax
+# distribution over the number of classes.
+# NOTE: The GCN layer implements the graph convolution operation from the paper:
+# "Semi-Supervised Classification with Graph Convolutional Networks"
+#  X' = D^-1/2 A D^-1/2 X W
+# where:
+# A is the modified adjacency matrix with inserted self-loops and
+# D is the corresponding diagonal degree matrix.
+class GCN(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = GCNConv(dataset.num_node_features, 16)
+        self.conv2 = GCNConv(16, dataset.num_classes)
+
+    def forward(self, data):
+        x, edge_index = data.x, data.edge_index
+
+        x = self.conv1(x, edge_index)
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        x = self.conv2(x, edge_index)
+
+        return F.log_softmax(x, dim=1)
+
+
+# https://pytorch-geometric.readthedocs.io/en/latest/notes/introduction.html
+if __name__ == "__main__":
+    # It’s time to implement our first graph neural network!
+
+    # We first need to load the Cora dataset:
+    dataset = Planetoid(root=f"{DATA_DIR}/datasets/Cora", name="Cora")
+    print(f"Dataset size: {len(dataset)}")
+    print(
+        f"Dataset: {dataset[0]}"
+    )  # NOTE: this is the graph data, since the dataset is a single graph
+    print(f"Number of classes: {dataset.num_classes}")
+    print(f"Number of node features: {dataset.num_node_features}")
+    print(f"Number of edges: {dataset.edge_index.shape[1]}")
+    print(f"Number of node features: {dataset.num_node_features}")
+
+    device = resolve_device()
+    model = GCN().to(device)
+    data = dataset[0].to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+
+    # Let’s train this model on the training nodes for 200 epochs:
+    model.train()
+    for epoch in range(200):
+        optimizer.zero_grad()
+        out = model(data)
+        loss = F.nll_loss(out[data.train_mask], data.y[data.train_mask])
+        loss.backward()
+        optimizer.step()
+
+    # Finally, we can evaluate our model on the test nodes:
+    model.eval()
+    pred = model(data).argmax(dim=1)
+    correct = (pred[data.test_mask] == data.y[data.test_mask]).sum()
+    acc = int(correct) / int(data.test_mask.sum())
+    print(f"Accuracy: {acc:.4f}")

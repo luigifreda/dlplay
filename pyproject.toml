@@ -1,0 +1,59 @@
+[project]
+name = "dlplay"
+version = "0.1.0"
+description = "Start play with DL in Python, PyTorch, JAX, and TensorFlow"
+authors = [
+    {name = "Luigi Freda", email = "luigifreda@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11.9"
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python",
+    "opencv-contrib-python",
+    "matplotlib",
+    "jax",
+    "jaxlib",
+    "torch",             # for deep learning
+    "torchvision",       # for video processing
+    "torchaudio",        # for audio processing
+    "pytorch-lightning", # for training models and other utilities
+    "torch-geometric",   # for graph networks
+    "torch-cluster",
+    "torch-scatter",
+    "scipy",
+    "scikit-learn",
+    "pandas",
+    "datasets[all]>=2.19.1",
+    "tqdm",
+    "transformers",
+    "tensorflow>=2.19.0",
+    "tf-keras",
+    "soundfile",
+    "librosa",
+    "albumentations",
+    "evaluate",
+    "accelerate",
+    "pillow",
+    "notebook",        # for jupyter notebooks
+    "pycocotools",     # for COCO dataset
+    "einops",          # for tensor operations
+    "open3d",          # for point cloud processing
+    "kagglehub",       # for downloading datasets from Kaggle
+    "trimesh",         # for loading 3D models
+    "plyfile",         # for loading ply files
+    "wandb",           # for logging to wandb
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "torch"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dlplay"]
+
+[tool.setuptools.package-dir]
+dlplay = "dlplay"
+
+[project.urls]
+Repository = "https://github.com/luigifreda/dlplay"

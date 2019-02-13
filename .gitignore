@@ -1,0 +1,25 @@
+.*.swp
+.*.swo
+__pycache__
+tmp
+build
+debug.txt
+map.json
+config.pyc 
+
+.vscode
+.python-version
+
+# pixi environments
+.pixi
+*.egg-info
+
+# data
+data/datasets/
+results
+
+quickstart/tensorflow/data
+
+thirdparty/torch-points3d
+
+apps/finetuning/_original_finetuning
